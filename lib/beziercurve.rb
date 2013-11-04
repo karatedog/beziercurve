@@ -96,10 +96,3 @@ module Bezier
 		end
 	end
 end
-
-__END__
-
-bezier = Bezier::Curve.new(Bezier::ControlPoint.new(40,250), Bezier::ControlPoint.new(35,100), Bezier::ControlPoint.new(150,70), Bezier::ControlPoint.new(210,120)) # cubic curve, 4 coordinates
-
-puts bezier.hullpoints[0].x
-#puts "#{bezier.point_on_curve(0.013).x} #{bezier.point_on_curve(0.013).y}"
