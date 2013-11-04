@@ -28,7 +28,7 @@ module Bezier
 	class Curve
 		attr_accessor :hullpoints
 
-		def initialize(hullpoints)
+		def initialize(*hullpoints)
 			# need at least 3 control points
 			if hullpoints.length < 3 then
 				raise "Cannot create Bézier curve with less than 3 control points" 
@@ -90,20 +90,16 @@ module Bezier
 	    		end
 	  		end
 		end
+
+		def order
+			@hullpoints.length
+		end
 	end
 end
 
-# class Array
-#   def with_next
-#     i = 0
-#     until i == size-1
-#       yield self[i], self[i+1]
-#       i += 1
-#     end
-#   end
-# end
+__END__
 
-bezier = Bezier::Curve.new([Bezier::ControlPoint.new(40,250), Bezier::ControlPoint.new(35,100), Bezier::ControlPoint.new(150,70), Bezier::ControlPoint.new(210,120)]) # cubic curve, 4 coordinates
+bezier = Bezier::Curve.new(Bezier::ControlPoint.new(40,250), Bezier::ControlPoint.new(35,100), Bezier::ControlPoint.new(150,70), Bezier::ControlPoint.new(210,120)) # cubic curve, 4 coordinates
 
 puts bezier.hullpoints[0].x
 #puts "#{bezier.point_on_curve(0.013).x} #{bezier.point_on_curve(0.013).y}"
