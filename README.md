@@ -1,4 +1,4 @@
-**Bézier Ruby Gem** {#welcome}
+**Bézier Ruby Gem**
 ==
 
 A Ruby gem for creating Bézier curves.
@@ -14,6 +14,6 @@ Sample application
 
     require 'bezier'
     
-    b = Bezier.new(ControlPoint.new([40, 250]), ControlPoint.new([50, 150]), ControlPoint.new([90, 220]))
+    b = Bezier::Curve.new(Bezier::ControlPoint.new([40, 250]), Bezier::ControlPoint.new([50, 150]), Bezier::ControlPoint.new([90, 220]))
     
     puts b.point_on_curve(0.2)
