@@ -1,7 +1,6 @@
 module Bezier
 
 	class ControlPoint
-		# maybe replace the accessors and initialization with Struct
 		attr_accessor :x, :y
 		def initialize(x,y)
 			@x = x
@@ -20,29 +19,35 @@ module Bezier
 			CurvePoint.new(self.x, self.y)
 		end
 	end
-	class CurvePoint < ControlPoint # minimal type safety, but both class have the same functionality
+	class CurvePoint < ControlPoint
+		# @return [ControlPoint] Converts the object to ControlPoint. CurvePoint and ControlPoints are iden
 		def to_control
 			ControlPoint.new(self.x, self.y)
 		end
 	end
 	class Curve
-		attr_accessor :hullpoints
+		attr_accessor :controlpoints
 
-		def initialize(*hullpoints)
+		def initialize(*controlpoints)
 			# need at least 3 control points
-			if hullpoints.length < 3 then
+			if controlpoints.length < 3 then
 				raise "Cannot create Bézier curve with less than 3 control points" 
 			end
 
-			# check for rogue value types
-			if hullpoints.find {|p| p.class != ControlPoint} == nil
-				@hullpoints = hullpoints
+			# check for proper types
+			local_cp = controlpoints.map do |cp|
+				p cp
+				if cp.class == ControlPoint # do nothing
+					cp
+				elsif cp.class == Array # convert Array to ControlPoint
+					ControlPoint.new(*cp) # splat Arrays into list
+				end
 			end
 		end
 
 		def add(point)
 			if point.class == ControlPoint
-				@hullpoints << point
+				@controlpoints << point
 			else
 				raise TypeError, "Point should be type of ControlPoint"
 			end
@@ -60,7 +65,7 @@ module Bezier
 			end
 
 			# imperatively ugly but works, refactor later. point_on_curve and point_on_hull should be one method
-			ary = @hullpoints
+			ary = @controlpoints
 			return ary if ary.length <= 1 # zero or one element as argument, return unmodified
 
 			while ary.length > 1
@@ -75,7 +80,7 @@ module Bezier
 		end
 
 		def display_points # just a helper, for quickly put CotrolPOints to STDOUT in a gnuplottable format
-			@hullpoints.map{|point| puts "#{point.x} #{point.y}"}
+			@controlpoints.map{|point| puts "#{point.x} #{point.y}"}
 		end
 
 		def enumerated(start_t, delta_t)
@@ -92,7 +97,7 @@ module Bezier
 		end
 
 		def order
-			@hullpoints.length
+			@controlpoints.length
 		end
 	end
 end
