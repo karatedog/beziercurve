@@ -1,7 +1,6 @@
 module Bezier
 
 	class ControlPoint
-		# maybe replace the accessors and initialization with Struct
 		attr_accessor :x, :y
 		def initialize(x,y)
 			@x = x
@@ -20,39 +19,40 @@ module Bezier
 			CurvePoint.new(self.x, self.y)
 		end
 	end
-	class CurvePoint < ControlPoint # minimal type safety, but both class have the same functionality
+	class CurvePoint < ControlPoint
+		# @return [ControlPoint] the object converted into the expected format.
 		def to_control
 			ControlPoint.new(self.x, self.y)
 		end
 	end
 	class Curve
-		attr_accessor :hullpoints
+		attr_accessor :controlpoints
 
-		def initialize(*hullpoints)
+		def initialize(*controlpoints)
 			# need at least 3 control points
-			if hullpoints.length < 3 then
-				raise "Cannot create Bézier curve with less than 3 control points" 
+			if controlpoints.length < 3
+				raise 'Cannot create Bézier curve with less than 3 control points'
 			end
 
-			# check for rogue value types
-			if hullpoints.find {|p| p.class != ControlPoint} == nil
-				@hullpoints = hullpoints
+			# check for proper types
+			if controlpoints.find {|p| p.class != ControlPoint} == nil
+				@controlpoints = controlpoints
 			end
 		end
 
 		def add(point)
 			if point.class == ControlPoint
-				@hullpoints << point
+				@controlpoints << point
 			else
-				raise TypeError, "Point should be type of ControlPoint"
+				raise TypeError, 'Point should be type of ControlPoint'
 			end
 		end
 
 		def point_on_curve(t)
-			
+
 			def point_on_hull(point1, point2, t) # making this local
 				if (point1.class != ControlPoint) or (point2.class != ControlPoint)
-					raise TypeError, "Both points should be type of ControlPoint"
+					raise TypeError, 'Both points should be type of ControlPoint'
 				end
 				new_x = (point1.x - point2.x) * t
 				new_y = (point1.y - point2.y) * t
@@ -60,14 +60,14 @@ module Bezier
 			end
 
 			# imperatively ugly but works, refactor later. point_on_curve and point_on_hull should be one method
-			ary = @hullpoints
+			ary = @controlpoints
 			return ary if ary.length <= 1 # zero or one element as argument, return unmodified
 
 			while ary.length > 1
 				temp = []
 				0.upto(ary.length-2) do |index|
-					memoize1 = point_on_hull(ary[index], ary[index+1], t) 
-					temp << ary[index+0] - memoize1 
+					memoize1 = point_on_hull(ary[index], ary[index+1], t)
+					temp << ary[index+0] - memoize1
 				end
 				ary = temp
 			end
@@ -75,7 +75,7 @@ module Bezier
 		end
 
 		def display_points # just a helper, for quickly put CotrolPOints to STDOUT in a gnuplottable format
-			@hullpoints.map{|point| puts "#{point.x} #{point.y}"}
+			@controlpoints.map{|point| puts "#{point.x} #{point.y}"}
 		end
 
 		def enumerated(start_t, delta_t)
@@ -92,7 +92,7 @@ module Bezier
 		end
 
 		def order
-			@hullpoints.length
+			@controlpoints.length
 		end
 	end
 end
