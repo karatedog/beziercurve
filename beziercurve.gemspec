@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name        = 'beziercurve'
   s.version     = '0.5'
-  s.date        = '2013-11-04'
-  s.summary     = "Create Bnd analyze ézier curves"
+  s.date        = '2013-12-18'
+  s.summary     = "Create and analyze Bézier curves"
   s.description = "Creates a Bézier curve by its control points. Implemented with de Casteljau method."
   s.authors     = ["Földes László"]
   s.email       = 'foldes.laszlo2@gmail.com'
