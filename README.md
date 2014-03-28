@@ -7,6 +7,7 @@ History
 -------
 
 0.7 - implemented the De Casteljau algorithm
+
 0.8 - defined minimum Ruby version (2.0.0)
 
 
