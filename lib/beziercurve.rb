@@ -1,11 +1,11 @@
+# Curve == series of ControlPoints
 module Bezier
 
 	class ControlPoint
-		attr_accessor :x, :y, :weight
-		def initialize(x,y,weight=1)
+		attr_accessor :x, :y
+		def initialize(x,y)
 			@x = x
 			@y = y
-			@weight = weight
 		end
 		def - (b)
 			self.class.new(self.x - b.x, self.y - b.y)
@@ -14,19 +14,24 @@ module Bezier
 			self.class.new(self.x + b.x, self.y + b.y)
 		end
 		def inspect
-			return @x, @y, @weight
+			return @x, @y
 		end
-		# @return [CurvePoint] the object converted into the expected format.
-		def to_curve
-			CurvePoint.new(self.x, self.y, self.weight)
+		# @return [CurvePoint] Returns a ControlPoint, converted to CurvePoint (only naming differences).
+		def to_curvepoint
+			CurvePoint.new(self.x, self.y)
+		end
+		def to_a
+			[self.x, self.y]
 		end
 	end
+	
 	class CurvePoint < ControlPoint
-		# @return [ControlPoint] the object converted into the expected format.
-		def to_control
-			ControlPoint.new(self.x, self.y, self.weight)
+		# @return [ControlPoint] point coordinates on the Bézier curve.
+		def to_controlpoint
+			ControlPoint.new(self.x, self.y)
 		end
 	end
+
 	class Curve
 		# returns hull control points
 		attr_accessor :controlpoints
@@ -38,6 +43,7 @@ module Bezier
 		#    initialize(p1, [20, 30], p3)
 		def initialize(*controlpoints)
 			# need at least 3 control points
+			# this constraint has to be lifted, to allow adding Curves together like a 1 point curve to a 3 point curve
 			if controlpoints.size < 3
 				raise ArgumentError, 'Cannot create Bézier curve with less than 3 control points'
 			end
@@ -51,23 +57,9 @@ module Bezier
 					raise 'Control points should be type of ControlPoint or Array'
 				end
 			  }
-
-			# check for proper types, double negative check, Hungarians understand it w/o any problem :-)
-			# if controlpoints.detect {|p| (p.class != ControlPoint) && (p.class != Array)} == nil
-			# 	conv_ctrlpoint = controlpoints.map { |e| 
-			# 		if e.class == Array
-			# 			ControlPoint.new(*e[0..1]) # make sure ControlPoint.new gets no more than 2 arguments. 'e' should contain at least 2 elements here
-			# 		else
-			# 			e
-			# 		end
-			# 	 }
-			# 	@controlpoints = controlpoints
-			# else
-			# 	raise 'Control points must be type of ControlPoint or Array([x,y])'
-			# end
 		end
 
-		# @param [ControlPoint] point addition
+		# @param point [ControlPoint] addition
 		def add(point)
 			if point.class == ControlPoint
 				@controlpoints << point
@@ -76,6 +68,7 @@ module Bezier
 			end
 		end
 
+		# @param t [CurvePoint] 
 		def point_on_curve(t)
 
 			def point_on_hull(point1, point2, t) # making this method local
@@ -99,7 +92,38 @@ module Bezier
 				end
 				ary = temp
 			end
-			return temp[0].to_curve
+			return temp[0].to_curvepoint
+		end
+
+		def pascaltriangle(nth_line)
+			# @param n [Fixnum] Ye' olde factorial function
+			# @todo this is slow, should be rewritten
+			# @return [Array] an array of the specified line from the Pascal triangle
+			# @example
+			#   > fact(5)
+			#   > 
+			def fact(n)
+				(1..n).reduce(:*)
+			end
+
+			# @param n [Fixnum]
+			# @param k [Fixnum]
+			def binomial(n,k)
+				return 1 if n-k <= 0
+				return 1 if k <= 0
+				fact(n) / ( fact(k) * fact( n - k ) )
+			end
+			(0..nth_line).map { |e| binomial(nth_line, e) }
+		end
+
+		def point_on_curve_binom(t)
+
+			# locally scoped, we don't need it outside of point_on_curve_binom
+
+			coeffs = pascaltriangle(self.order)
+			coeffs.reduce { |memo, obj| 
+				memo += t**obj * (1-t)** (n - obj) 
+			}
 		end
 
 		def display_points # just a helper, for quickly put ControlPoints to STDOUT in a gnuplottable format
@@ -113,7 +137,7 @@ module Bezier
 	    		loop do
 	      			yielder.yield(number)
 	      			point_position += delta_t.to_f
-	      			raise StopIteration if point_position > 1
+	      			raise StopIteration if point_position > 1.0
 	      			number = point_on_curve(point_position)
 	    		end
 	  		end
@@ -123,4 +147,5 @@ module Bezier
 			@controlpoints.size
 		end
 	end
+
 end
