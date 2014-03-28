@@ -1,8 +1,7 @@
 **Bézier Ruby Gem**
 ==
 
-A Ruby gem for creating and analyzing Bézier curves.
-Allows you to create a Bézier curve by its control points, get specific point on that curve or iterate the curve points by an Enumerator. Inspired by [A Primer on Bézier Curves](http://pomax.github.io/bezierinfo/).
+A Ruby gem for creating and analyzing Bézier curves. Allows you to create a Bézier curve by its control points, get specific point on that curve or iterate the curve points by an Enumerator. Inspired by [A Primer on Bézier Curves](http://pomax.github.io/bezierinfo/).
 
 History
 -------
