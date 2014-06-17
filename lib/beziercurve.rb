@@ -24,7 +24,7 @@ module Bezier
 			[self.x, self.y]
 		end
 	end
-	
+
 	class CurvePoint < ControlPoint
 		# @return [ControlPoint] point coordinates on the Bézier curve.
 		def to_controlpoint
@@ -68,7 +68,7 @@ module Bezier
 			end
 		end
 
-		# @param t [CurvePoint] 
+		# @param t [CurvePoint]
 		def point_on_curve(t)
 
 			def point_on_hull(point1, point2, t) # making this method local
@@ -92,7 +92,7 @@ module Bezier
 				end
 				ary = temp
 			end
-			return temp[0].to_curvepoint
+			temp[0].to_curvepoint
 		end
 
 		def pascaltriangle(nth_line)
@@ -101,7 +101,7 @@ module Bezier
 			# @return [Array] an array of the specified line from the Pascal triangle
 			# @example
 			#   > fact(5)
-			#   > 
+			#   >
 			def fact(n)
 				(1..n).reduce(:*)
 			end
@@ -121,8 +121,8 @@ module Bezier
 			# locally scoped, we don't need it outside of point_on_curve_binom
 
 			coeffs = pascaltriangle(self.order)
-			coeffs.reduce { |memo, obj| 
-				memo += t**obj * (1-t)** (n - obj) 
+			coeffs.reduce { |memo, obj|
+				memo += t**obj * (1-t)** (n - obj)
 			}
 		end
 
