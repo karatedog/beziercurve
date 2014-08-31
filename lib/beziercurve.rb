@@ -7,11 +7,15 @@ module Bezier
 			@x = x
 			@y = y
 		end
-		def - (b)
-			self.class.new(self.x - b.x, self.y - b.y)
+        # @param point [ControlPoint] subtract argument from Self
+        # @return [ControlPoint] Returns a ControlPoint
+        def - (point)
+			self.class.new(self.x - point.x, self.y - point.y)
 		end
-		def + (b)
-			self.class.new(self.x + b.x, self.y + b.y)
+        # @param point [ControlPoint] add argument to Self
+        # @return [ControlPoint] Returns a ControlPoint
+        def + (point)
+			self.class.new(self.x + point.x, self.y + point.y)
 		end
 		def inspect
 			return @x, @y
@@ -20,7 +24,8 @@ module Bezier
 		def to_curvepoint
 			CurvePoint.new(self.x, self.y)
 		end
-		def to_a
+        # @return [Array] Returns an Array. The Array is fit to be argument to Curve.new
+        def to_a
 			[self.x, self.y]
 		end
 	end
