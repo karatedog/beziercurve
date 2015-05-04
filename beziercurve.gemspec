@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.authors     = ["Földes László"]
   s.email       = 'foldes.laszlo2@gmail.com'
   s.files       = ["lib/beziercurve.rb"]
-  s.homepage    = 'http://devrandom.postr.hu'
+  s.homepage    = 'https://github.com/karatedog/beziercurve'
   s.license	= "MIT"
 end

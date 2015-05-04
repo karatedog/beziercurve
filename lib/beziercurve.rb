@@ -1,31 +1,41 @@
 # Curve == series of ControlPoints
+
 module Bezier
 
 	class ControlPoint
 		attr_accessor :x, :y
+
 		def initialize(x,y)
 			@x = x
-			@y = y
+			@y = y		
 		end
-        # @param point [ControlPoint] subtract argument from Self
-        # @return [ControlPoint] Returns a ControlPoint
-        def - (point)
-			self.class.new(self.x - point.x, self.y - point.y)
-		end
-        # @param point [ControlPoint] add argument to Self
-        # @return [ControlPoint] Returns a ControlPoint
-        def + (point)
+
+		def - (b)
+    	self.class.new(self.x - b.x, self.y - b.y)
+    end
+    def + (b)
+    	self.class.new(self.x + b.x, self.y + b.y)
+    end
+
+		# @param point [ControlPoint]
+		#
+    # @return [ControlPoint] Moves a ControlPoint
+    # Moves Self by the 'point' as relative coordinates
+    def movepoint (point)
 			self.class.new(self.x + point.x, self.y + point.y)
 		end
+
 		def inspect
 			return @x, @y
 		end
-		# @return [CurvePoint] Returns a ControlPoint, converted to CurvePoint (only naming differences).
+
+		# @return [CurvePoint] Returns a ControlPoint, converted to CurvePoint (this is only a naming difference).
 		def to_curvepoint
 			CurvePoint.new(self.x, self.y)
 		end
-        # @return [Array] Returns an Array. The Array is fit to be argument to Curve.new
-        def to_a
+
+    # @return [Array] Returns an Array. The Array is fit to be as argument to Curve.new
+    def to_a
 			[self.x, self.y]
 		end
 	end
@@ -38,15 +48,18 @@ module Bezier
 	end
 
 	class Curve
-		# returns hull control points
+		# Returns the Bezier curve control points
+		#
+		# @return [Array<ControlPoints>]
 		attr_accessor :controlpoints
 
-		# @param controlpoints [Array<ControlPoints, Array(Fixnum, Fixnum)>] list of ControlPoints defining the hull for the Bézier curve. A point can be of class ControlPoint or an Array containig 2 Fixnums, which will be converted to ControlPoint.
-		# @return [Curve] a Bézier curve object
+		# @param controlpoints [Array<ControlPoints>, Array<(Fixnum, Fixnum)>] list of ControlPoints defining the hull for the Bézier curve. A point can be of class ControlPoint or an Array containig 2 Fixnums, which will be converted to ControlPoint.
+		# @return [Curve] a Bézier curve object. The minimum number of control points is 3.
 		# @example
 		#    initialize(p1, p2, p3)
 		#    initialize(p1, [20, 30], p3)
 		def initialize(*controlpoints)
+			
 			# need at least 3 control points
 			# this constraint has to be lifted, to allow adding Curves together like a 1 point curve to a 3 point curve
 			if controlpoints.size < 3
@@ -64,7 +77,9 @@ module Bezier
 			  }
 		end
 
-		# @param point [ControlPoint] addition
+		# Adds a new control point to the Bezier curve as endpoint.
+		#
+		# @param [ControlPoint] point
 		def add(point)
 			if point.class == ControlPoint
 				@controlpoints << point
@@ -73,8 +88,8 @@ module Bezier
 			end
 		end
 
-		# @param t [CurvePoint]
-		def point_on_curve(t)
+		# @param [CurvePoint] t
+		def point_on_curve(t) # calculates the 'x,y' coordinates of a point on the curve, at the ratio 't' (remember, 0 <= t <= 1)
 
 			def point_on_hull(point1, point2, t) # making this method local
 				if (point1.class != ControlPoint) or (point2.class != ControlPoint)
@@ -100,24 +115,29 @@ module Bezier
 			temp[0].to_curvepoint
 		end
 
-		def pascaltriangle(nth_line)
-			# @param n [Fixnum] Ye' olde factorial function
-			# @todo this is slow, should be rewritten
-			# @return [Array] an array of the specified line from the Pascal triangle
-			# @example
-			#   > fact(5)
-			#   >
-			def fact(n)
-				(1..n).reduce(:*)
-			end
+		# Ye' olde factorial function
+		#
+		# @param n [Fixnum] 
+		# @todo this is slow, should be rewritten
+		# @example
+		#   > fact(5)
+		def self.fact(n)
+			(1..n).reduce(:*)
+		end
 
-			# @param n [Fixnum]
-			# @param k [Fixnum]
-			def binomial(n,k)
-				return 1 if n-k <= 0
-				return 1 if k <= 0
-				fact(n) / ( fact(k) * fact( n - k ) )
-			end
+		# @param n [Fixnum]
+		# @param k [Fixnum]
+		# standard 'n choose k'
+		def self.binomial(n,k) 
+			return 1 if n-k <= 0
+			return 1 if k <= 0
+			fact(n) / ( fact(k) * fact( n - k ) )
+		end
+
+		# Returns the specified line from the Pascal triangle as an Array
+		# @todo memoize already created lines or precalculate a few ten lines
+		# @return [Array] A line from the Pascal triangle
+		def self.pascaltriangle(nth_line) # Classic Pascal triangle
 			(0..nth_line).map { |e| binomial(nth_line, e) }
 		end
 
@@ -125,7 +145,7 @@ module Bezier
 
 			# locally scoped, we don't need it outside of point_on_curve_binom
 
-			coeffs = pascaltriangle(self.order)
+			coeffs = self.class.pascaltriangle(self.order)
 			coeffs.reduce { |memo, obj|
 				memo += t**obj * (1-t)** (n - obj)
 			}
@@ -135,6 +155,7 @@ module Bezier
 			@controlpoints.map{|point| puts "#{point.x} #{point.y}"}
 		end
 
+		# returns a new Enumerator that iterates over the Bezier curve from [start_t] to 1 by [delta_t] steps.
 		def enumerated(start_t, delta_t)
 	  		Enumerator.new do |yielder|
 	  			point_position = start_t.to_f
@@ -148,9 +169,9 @@ module Bezier
 	  		end
 		end
 
+		# returns the order of the Bezier curve, aka the number of control points.
 		def order
 			@controlpoints.size
 		end
 	end
-
 end
