@@ -144,9 +144,9 @@ module Bezier
 		# @param [CurvePoint] t
 		def point_on_curve(t) # calculates the 'x,y' coordinates of a point on the curve, at the ratio 't' (0 <= t <= 1)
       case
-        when @@calculation_method == DeCasteljau
+        when @calculation_method == DeCasteljau
           poc_with_decasteljau(t)
-        when @@calculation_method == Bernstein
+        when @calculation_method == Bernstein
           poc_with_bernstein(t)
         else
           poc_with_bernstein(t) # default
